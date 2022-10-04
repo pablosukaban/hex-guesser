@@ -1,71 +1,83 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import { useEffect, useState } from 'react'
-import { v4 as uuidv4 } from "uuid"
+import type { NextPage } from "next";
+import Head from "next/head";
+import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 type HexValueType = {
-  id: string,
-  value: string
-}
+  id: string;
+  value: string;
+};
 
 type ButtonCustomType = {
-  item: HexValueType
-  clickHandler: (id: string) => void
-}
+  item: HexValueType;
+  clickHandler: (id: string) => void;
+};
 
 const ButtonCustom: React.FC<ButtonCustomType> = ({ item, clickHandler }) => {
   return (
-    <button onClick={() => clickHandler(item.id)} className='border border-gray-300 rounded shadow text-lg px-4 py-6'>{item.value}</button>)
-}
+    <button
+      onClick={() => clickHandler(item.id)}
+      className="border border-gray-300 rounded shadow-md text-lg text-gray-600 hover:text-gray-900 px-4 py-6 hover:border-gray-500 transition active:translate-y-1 active:shadow-none"
+    >
+      {item.value}
+    </button>
+  );
+};
 
 function hexRandomizer() {
-  const ALL_VALS = "123456789ABCDEF"
-  let color: string = "#"
+  const ALL_VALS = "123456789ABCDEF";
+  let color: string = "#";
   for (let i = 0; i < 6; i++) {
-    const randomNum = Math.floor(Math.random() * ALL_VALS.length)
-    color += ALL_VALS[randomNum]
+    const randomNum = Math.floor(Math.random() * ALL_VALS.length);
+    color += ALL_VALS[randomNum];
   }
-  return color
+  return color;
 }
 
 function hexItemGenerator(): HexValueType {
   return {
     id: uuidv4(),
-    value: hexRandomizer()
-  }
+    value: hexRandomizer(),
+  };
 }
 
 function hexListGenerator() {
-  const result = []
+  const result = [];
   for (let i = 0; i < 4; i++) {
-    let color = hexItemGenerator()
-    result.push(color)
+    let color = hexItemGenerator();
+    result.push(color);
   }
-  return result
+  return result;
 }
 
 const Home: NextPage = () => {
-  const [valuesList, setValuesList] = useState<HexValueType[]>([])
-  const [isCorrect, setIsCorrect] = useState(false)
-  const randomHexIndex = Math.floor(Math.random() * 4)
+  const [valuesList, setValuesList] = useState<HexValueType[]>([]);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [isStart, setIsStart] = useState(true);
+  const [count, setCount] = useState(0);
+
+  const randomHexIndex = Math.floor(Math.random() * 4);
+
   const chosenHexStyles = {
-    backgroundColor: valuesList[randomHexIndex]?.value
-  }
+    backgroundColor: valuesList[randomHexIndex]?.value,
+  };
 
   useEffect(() => {
-    setValuesList(hexListGenerator())
-  }, [])
-
+    setValuesList(hexListGenerator());
+    setIsStart(true);
+  }, []);
 
   const clickHandler = (id: string) => {
     if (id === valuesList[randomHexIndex].id) {
-      setIsCorrect(true)
+      setIsCorrect(true);
+      setCount((prev) => prev + 1);
     } else {
-      setIsCorrect(false)
+      setIsCorrect(false);
+      setCount(0);
     }
-    setValuesList(hexListGenerator())
-  }
-
+    setValuesList(hexListGenerator());
+    setIsStart(false)
+  };
 
   return (
     <div>
@@ -75,23 +87,34 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className='min-h-screen flex justify-center items-center'>
-        <div className='max-w-lg flex flex-col justify-center items-center gap-6 border border-gray-100 shadow-lg p-8 rounded'>
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="max-w-lg flex flex-col justify-center items-center gap-4 border border-gray-100 shadow-lg p-8 rounded">
           <div className={`w-80 h-80 rounded`} style={chosenHexStyles} />
-          <div className='w-full grid grid-cols-2 gap-8'>
-            {valuesList.map(item => (
-              <ButtonCustom item={item} key={item.id} clickHandler={clickHandler} />
+          <div className="w-full grid grid-cols-2 gap-8 mt-2">
+            {valuesList.map((item) => (
+              <ButtonCustom
+                item={item}
+                key={item.id}
+                clickHandler={clickHandler}
+              />
             ))}
           </div>
-          {isCorrect
-            ? <h1 className='text-center font-bold text-green-400'>Correct!</h1>
-            : <h1 className='text-center font-bold text-red-400'>Incorrect!</h1>
-          }
+          <h1>Счет: {count}</h1>
+          <div className={`${isStart && "hidden"}`}>
+            {isCorrect ? (
+              <h1 className="text-center font-bold text-green-400 text-xl">
+                Правильно!
+              </h1>
+            ) : (
+              <h1 className="text-center font-bold text-red-400 text-xl">
+                Неправильно!
+              </h1>
+            )}
+          </div>
         </div>
-
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
