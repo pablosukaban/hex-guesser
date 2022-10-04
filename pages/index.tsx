@@ -1,19 +1,71 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { v4 as uuidv4 } from "uuid"
 
-const ButtonCustom = ({ text }: { text: string }) => {
+type HexValueType = {
+  id: string,
+  value: string
+}
+
+type ButtonCustomType = {
+  item: HexValueType
+  clickHandler: (id: string) => void
+}
+
+const ButtonCustom: React.FC<ButtonCustomType> = ({ item, clickHandler }) => {
   return (
-    <button className='border border-gray-300 rounded shadow text-lg px-4 py-6'>{text}</button>)
+    <button onClick={() => clickHandler(item.id)} className='border border-gray-300 rounded shadow text-lg px-4 py-6'>{item.value}</button>)
+}
+
+function hexRandomizer() {
+  const ALL_VALS = "123456789ABCDEF"
+  let color: string = "#"
+  for (let i = 0; i < 6; i++) {
+    const randomNum = Math.floor(Math.random() * ALL_VALS.length)
+    color += ALL_VALS[randomNum]
+  }
+  return color
+}
+
+function hexItemGenerator(): HexValueType {
+  return {
+    id: uuidv4(),
+    value: hexRandomizer()
+  }
+}
+
+function hexListGenerator() {
+  const result = []
+  for (let i = 0; i < 4; i++) {
+    let color = hexItemGenerator()
+    result.push(color)
+  }
+  return result
 }
 
 const Home: NextPage = () => {
-  const [valuesList, setValuesList] = useState([
-    "#D3F99D",
-    "#CC6666",
-    "#5E597E",
-    "#FF7E00",
-  ])
+  const [valuesList, setValuesList] = useState<HexValueType[]>([])
+  const [isCorrect, setIsCorrect] = useState(false)
+  const randomHexIndex = Math.floor(Math.random() * 4)
+  const chosenHexStyles = {
+    backgroundColor: valuesList[randomHexIndex]?.value
+  }
+
+  useEffect(() => {
+    setValuesList(hexListGenerator())
+  }, [])
+
+
+  const clickHandler = (id: string) => {
+    if (id === valuesList[randomHexIndex].id) {
+      setIsCorrect(true)
+    } else {
+      setIsCorrect(false)
+    }
+    setValuesList(hexListGenerator())
+  }
+
 
   return (
     <div>
@@ -24,13 +76,17 @@ const Home: NextPage = () => {
       </Head>
 
       <div className='min-h-screen flex justify-center items-center'>
-        <div className='max-w-lg flex flex-col justify-center items-center gap-6 border border-gray-100 shadow-lg p-8'>
-          <div className={`bg-teal-200 w-80 h-80`} />
+        <div className='max-w-lg flex flex-col justify-center items-center gap-6 border border-gray-100 shadow-lg p-8 rounded'>
+          <div className={`w-80 h-80 rounded`} style={chosenHexStyles} />
           <div className='w-full grid grid-cols-2 gap-8'>
             {valuesList.map(item => (
-              <ButtonCustom text={item} key={item} />
+              <ButtonCustom item={item} key={item.id} clickHandler={clickHandler} />
             ))}
           </div>
+          {isCorrect
+            ? <h1 className='text-center font-bold text-green-400'>Correct!</h1>
+            : <h1 className='text-center font-bold text-red-400'>Incorrect!</h1>
+          }
         </div>
 
       </div>
