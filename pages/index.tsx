@@ -55,8 +55,7 @@ const Home: NextPage = () => {
   const [isCorrect, setIsCorrect] = useState(false);
   const [isStart, setIsStart] = useState(true);
   const [count, setCount] = useState(0);
-
-  const randomHexIndex = Math.floor(Math.random() * 4);
+  const [randomHexIndex, setRandomHexIndex] = useState(() => Math.floor(Math.random() * 4))
 
   const chosenHexStyles = {
     backgroundColor: valuesList[randomHexIndex]?.value,
@@ -71,11 +70,12 @@ const Home: NextPage = () => {
     if (id === valuesList[randomHexIndex].id) {
       setIsCorrect(true);
       setCount((prev) => prev + 1);
+      setValuesList(hexListGenerator());
+      setRandomHexIndex(() => Math.floor(Math.random() * 4))
     } else {
       setIsCorrect(false);
       setCount(0);
     }
-    setValuesList(hexListGenerator());
     setIsStart(false);
   };
 
@@ -88,10 +88,12 @@ const Home: NextPage = () => {
       </Head>
 
       <div className="min-h-screen flex justify-center items-center">
-        <div className="max-w-lg flex flex-col justify-center items-center gap-4 border border-gray-100 shadow-lg p-8 rounded">
-          <h1 className="text-center text-lg">Угадай Hex-значение данного цвета!</h1>
-          <div className={`w-80 h-80 rounded`} style={chosenHexStyles} />
-          <div className="w-full grid grid-cols-2 gap-8 mt-2">
+        <div className="max-w-lg flex flex-col justify-center items-center border border-gray-100 shadow-lg p-8 rounded">
+          <h1 className="text-center font-bold">
+            Угадай Hex-значение данного цвета!
+          </h1>
+          <div className={`w-80 h-80 rounded mt-4`} style={chosenHexStyles} />
+          <div className="w-full grid grid-cols-2 gap-8 mt-6">
             {valuesList.map((item) => (
               <ButtonCustom
                 item={item}
@@ -100,8 +102,8 @@ const Home: NextPage = () => {
               />
             ))}
           </div>
-          <h1>Счет: {count}</h1>
-          <div className={`${isStart && "hidden"}`}>
+          <h1 className='mt-4 mb-2 text-center font-bold'>Счет: {count}</h1>
+          <div className={`${isStart && "invisible"}`}>
             {isCorrect ? (
               <h1 className="text-center font-bold text-green-400 text-xl">
                 Правильно!
